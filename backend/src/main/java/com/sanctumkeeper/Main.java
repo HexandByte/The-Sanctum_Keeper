@@ -24,6 +24,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import com.sanctumkeeper.preview.PreviewResult;
+import com.sanctumkeeper.preview.PreviewService;
+
 public class Main{
 
     private static final Gson GSON = new Gson();
@@ -45,6 +48,7 @@ public class Main{
         }
         catch(InvalidPathException exception){
             System.err.println("Invalid configuration directory path.");
+            return;
         }
 
         //Here we tell Electron that Engine has started
@@ -179,10 +183,86 @@ public class Main{
                     sendError(id,"INVALID_REQUEST","Rules contain invalid data.");
                 }
             }
-            case "preview", "organize", "undo" -> sendError(id,
-                                                                        "NOT_IMPLEMENTED",
-                                                                        "Command handler is not implemented yet: "+command
-                                                                        );
+            case "preview" -> {
+                // Check that the request contains a non-empty source folder path
+                JsonElement sourceFolderElement=request.get("sourceFolder");
+
+                if(sourceFolderElement==null || !sourceFolderElement.isJsonPrimitive()
+                || !sourceFolderElement.getAsJsonPrimitive().isString()
+                || sourceFolderElement.getAsString().isBlank()){
+                    sendError(id, "INVALID_REQUEST",
+                    "Request must contain a non-empty SourceFolder string");
+                    return;
+                }
+
+                //Convert supplied string into a filesystem path
+                Path sourceFolder;
+                try{
+                    sourceFolder=Path.of(sourceFolderElement.getAsString());
+                }
+                catch(InvalidPathException exception){
+                    sendError(id, "INVALID_SOURCE_FOLDER",
+                    "Source folder path is invalid.");
+                    return;
+                }
+
+                //Load the saved rules
+                List<Rule> rules;
+                try{
+                    rules=ruleStorage.loadRules();
+                }
+                catch(IOException exception){
+                    sendError(id, "RULES_LOAD_FAILED", exception.getMessage());
+                    return;
+                }
+
+                //Call PreviewService clas for file evaluation
+                List<PreviewResult> results;
+                try{
+                    PreviewService previewService= new PreviewService();
+                    results=previewService.preview(sourceFolder,rules);
+                }
+                catch(IOException exception){
+                    sendError(id, "PREVIEW_FAILED", exception.getMessage());
+                    return;
+                }
+
+                //Convert results into JSON array for Electron
+                JsonArray resultsArray=new JsonArray();
+                int matchedCount=0;
+                int unmatchedCount=0;
+                for(PreviewResult result: results){
+                    JsonObject resultJson=new JsonObject();
+                    resultJson.addProperty("fileName",result.getFileName());
+                    resultJson.addProperty("status",result.getStatus());
+                    resultJson.addProperty("ruleId",result.getRuleId());
+                    resultJson.addProperty("action",result.getAction());
+                    resultJson.addProperty("destination",result.getDestination());
+
+                    resultsArray.add(resultJson);
+
+                    if("MATCHED".equals(result.getStatus()))
+                        matchedCount++;
+                    else if("NO_MATCH".equals(result.getStatus()))
+                        unmatchedCount++;
+                }
+
+                //Prepare summary of the preview
+                JsonObject summary=new JsonObject();
+                summary.addProperty("totalFiles",results.size());
+                summary.addProperty("matchedFiles",matchedCount);
+                summary.addProperty("unmatchedFiles",unmatchedCount);
+
+                //Combine results and summary into response data
+                JsonObject data=new JsonObject();
+                data.add("results",resultsArray);
+                data.add("summary",summary);
+                sendSuccess(id,data);
+            }
+            case "organize", "undo" -> sendError(id,
+                                                "NOT_IMPLEMENTED",
+                                                "Command handler is not implemented yet: "+command
+                                                );
 
             default -> sendError(
                 id,
