@@ -26,6 +26,8 @@ import java.util.List;
 
 import com.sanctumkeeper.preview.PreviewResult;
 import com.sanctumkeeper.preview.PreviewService;
+import com.sanctumkeeper.organize.OrganizeResult;
+import com.sanctumkeeper.organize.OrganizeService;
 
 public class Main{
 
@@ -33,6 +35,9 @@ public class Main{
 
     //Shared storage instance for the entire engine
     private static RuleStorage ruleStorage;
+
+    //Shared organize instance for the entire engine
+    private static OrganizeService organizeService;
 
     public static void main(String[] args) throws IOException{
 
@@ -50,6 +55,9 @@ public class Main{
             System.err.println("Invalid configuration directory path.");
             return;
         }
+
+        //Initialize organise service
+        organizeService=new OrganizeService();
 
         //Here we tell Electron that Engine has started
         JsonObject ready = new JsonObject();
@@ -259,10 +267,93 @@ public class Main{
                 data.add("summary",summary);
                 sendSuccess(id,data);
             }
-            case "organize", "undo" -> sendError(id,
-                                                "NOT_IMPLEMENTED",
-                                                "Command handler is not implemented yet: "+command
-                                                );
+            case "organize" -> {
+                    // Check that the request contains a non-empty source folder path
+                JsonElement sourceFolderElement=request.get("sourceFolder");
+
+                if(sourceFolderElement==null || !sourceFolderElement.isJsonPrimitive()
+                || !sourceFolderElement.getAsJsonPrimitive().isString()
+                || sourceFolderElement.getAsString().isBlank()){
+                    sendError(id, "INVALID_REQUEST",
+                    "Request must contain a non-empty SourceFolder string");
+                    return;
+                }
+
+                //Convert supplied string into a filesystem path
+                Path sourceFolder;
+                try{
+                    sourceFolder=Path.of(sourceFolderElement.getAsString());
+                }
+                catch(InvalidPathException exception){
+                    sendError(id, "INVALID_SOURCE_FOLDER",
+                    "Source folder path is invalid.");
+                    return;
+                }
+
+                //Load the saved rules
+                List<Rule> rules;
+                try{
+                    rules=ruleStorage.loadRules();
+                }
+                catch(IOException exception){
+                    sendError(id, "RULES_LOAD_FAILED", exception.getMessage());
+                    return;
+                }
+
+                //Perform file operations
+                List<OrganizeResult> results;
+                try{
+                    results=organizeService.organize(sourceFolder,rules);
+                }
+                catch(IOException exception){
+                    sendError(id, "ORGANIZE_FAILED", exception.getMessage());
+                    return;
+                }
+
+                //Convert the per-file results into JSON
+                JsonArray resultsArray=new JsonArray();
+                int organizedCount=0;
+                int unmatchedCount=0;
+                int skippedCount=0;
+                int failedCount=0;
+
+                for(OrganizeResult result:results){
+                    JsonObject resultJson=new JsonObject();
+                    resultJson.addProperty("fileName",result.getFileName());
+                    resultJson.addProperty("status",result.getStatus());
+                    resultJson.addProperty("ruleId",result.getRuleId());
+                    resultJson.addProperty("action",result.getAction());
+                    resultJson.addProperty("destination",result.getDestination());
+                    resultJson.addProperty("message",result.getMessage());
+
+                    resultsArray.add(resultJson);
+
+                    switch(result.getStatus()){
+                        case "ORGANIZED" -> organizedCount++;
+                        case "NO_MATCH" -> unmatchedCount++;
+                        case "SKIPPED_CONFLICT" -> skippedCount++;
+                        case "FAILED" -> failedCount++;
+                    }
+                }
+
+                //Prepare summary for Electron
+                JsonObject summary = new JsonObject();
+                summary.addProperty("totalFiles", results.size());
+                summary.addProperty("organizedFiles", organizedCount);
+                summary.addProperty("unmatchedFiles", unmatchedCount);
+                summary.addProperty("skippedFiles", skippedCount);
+                summary.addProperty("failedFiles", failedCount);
+
+                JsonObject data = new JsonObject();
+                data.add("results", resultsArray);
+                data.add("summary", summary);
+
+                 sendSuccess(id, data);
+            }
+            case "undo" -> sendError(id,
+                                    "NOT_IMPLEMENTED",
+                                    "Command handler is not implemented yet: "+command
+                                    );
 
             default -> sendError(
                 id,
