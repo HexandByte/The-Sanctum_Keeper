@@ -104,6 +104,13 @@ public class OrganizeService{
                 }
 
                 //Create destination directory when its missing
+                if (Files.exists(destinationDirectory, LinkOption.NOFOLLOW_LINKS)
+                && !Files.isDirectory(destinationDirectory, LinkOption.NOFOLLOW_LINKS)) {
+                throw new IOException(
+                "The destination path exists but is not a directory."
+                 );
+                }
+
                 Files.createDirectories(destinationDirectory);
 
                 //Check again after creation (I'm paranoid ok)
