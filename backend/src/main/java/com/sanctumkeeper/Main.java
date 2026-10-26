@@ -350,11 +350,60 @@ public class Main{
 
                  sendSuccess(id, data);
             }
-            case "undo" -> sendError(id,
-                                    "NOT_IMPLEMENTED",
-                                    "Command handler is not implemented yet: "+command
-                                    );
+           case "undo" -> {
 
+                // Attempt to undo exactly one file
+                List<OrganizeResult> results=organizeService.undo();
+
+                // Convert the result into a JSON array
+                JsonArray resultsArray=new JsonArray();
+
+                int restoredCount=0;
+                int conflictCount=0;
+                int missingCount=0;
+                int failedCount=0;
+
+                for(OrganizeResult result:results){
+
+                    JsonObject resultJson=new JsonObject();
+
+                    resultJson.addProperty("fileName",result.getFileName());
+                    resultJson.addProperty("status",result.getStatus());
+                    resultJson.addProperty("ruleId",result.getRuleId());
+                    resultJson.addProperty("action",result.getAction());
+                    resultJson.addProperty("destination",result.getDestination());
+                    resultJson.addProperty("message",result.getMessage());
+
+                    resultsArray.add(resultJson);
+
+                    switch(result.getStatus()){
+                        case "RESTORED" -> restoredCount++;
+                        case "SKIPPED_CONFLICT" -> conflictCount++;
+                        case "MISSING" -> missingCount++;
+                        case "FAILED" -> failedCount++;
+                    }
+                }
+
+                // Prepare the summary
+                JsonObject summary=new JsonObject();
+
+                summary.addProperty("restoredFiles",restoredCount);
+                summary.addProperty("conflicts",conflictCount);
+                summary.addProperty("missingFiles",missingCount);
+                summary.addProperty("failedFiles",failedCount);
+
+                // Prepare the response data
+                JsonObject data=new JsonObject();
+
+                data.add("results",resultsArray);
+                data.add("summary",summary);
+
+                if(results.isEmpty()){
+                data.addProperty("message","Nothing to undo.");
+                }
+
+                sendSuccess(id,data);
+            }
             default -> sendError(
                 id,
                 "UNKNOWN_COMMAND",
