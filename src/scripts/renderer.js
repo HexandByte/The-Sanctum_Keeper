@@ -163,9 +163,6 @@ const actionMessages = {
     "change-folder-button":
         "Folder selection is not connected yet.",
 
-    "add-folder-button":
-        "Adding watched folders will be implemented next.",
-
     "create-rule-button":
         "The rule editor is coming next.",
 
@@ -191,6 +188,111 @@ Object.entries(actionMessages).forEach(function ([id, message]) {
         });
     }
 });
+
+const addFolderButton = document.getElementById("add-folder-button");
+const selectedFolderPaths = new Set();
+
+function renderSelectedFolders() {
+    let panel = document.getElementById("selected-folders-panel");
+
+    if (!panel) {
+        panel = document.createElement("section");
+        panel.id = "selected-folders-panel";
+        panel.className = "selected-folders-panel";
+
+        panel.innerHTML = `
+            <div class="selected-folders-heading">
+                <h2>Selected Folders</h2>
+                <p>Available for this session only</p>
+            </div>
+            <div id="selected-folders-list"
+                 class="selected-folders-list"></div>
+        `;
+
+        const quickActions = document.querySelector(".quick-actions");
+
+        if (quickActions) {
+            quickActions.insertAdjacentElement("afterend", panel);
+        } else if (addFolderButton?.parentElement) {
+            addFolderButton.parentElement.insertAdjacentElement(
+                "afterend",
+                panel
+            );
+        } else {
+            document.querySelector("main")?.appendChild(panel);
+        }
+    }
+
+    const list = document.getElementById("selected-folders-list");
+    list.replaceChildren();
+
+    if (selectedFolderPaths.size === 0) {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.textContent = "No folders selected yet.";
+        list.appendChild(emptyMessage);
+        return;
+    }
+
+    selectedFolderPaths.forEach(function (folderPath) {
+        const item = document.createElement("div");
+        item.className = "selected-folder-item";
+
+        const details = document.createElement("div");
+        details.className = "selected-folder-details";
+
+        const name = document.createElement("strong");
+        const normalizedPath = folderPath.replace(/[\\/]+$/, "");
+
+        name.textContent =
+            normalizedPath.split(/[\\/]/).pop() || normalizedPath;
+
+        const path = document.createElement("p");
+        path.textContent = folderPath;
+
+        details.append(name, path);
+
+        const removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.textContent = "Remove";
+        removeButton.className = "remove-folder-button";
+
+        removeButton.addEventListener("click", function () {
+            selectedFolderPaths.delete(folderPath);
+            renderSelectedFolders();
+            showNotification("Folder removed from this session.");
+        });
+
+        item.append(details, removeButton);
+        list.appendChild(item);
+    });
+}
+
+if (addFolderButton) {
+    addFolderButton.addEventListener("click", async function () {
+        try {
+            const folderPath = await window.sanctum.selectFolder();
+
+            if (!folderPath) {
+                showNotification("Folder selection cancelled.");
+                return;
+            }
+
+            if (selectedFolderPaths.has(folderPath)) {
+                showNotification("This folder is already selected.");
+                return;
+            }
+
+            selectedFolderPaths.add(folderPath);
+            renderSelectedFolders();
+
+            showNotification("Folder selected successfully.");
+        } catch (error) {
+            console.error("Folder selection failed:", error);
+            showNotification("Could not open the folder picker.");
+        }
+    });
+}
+
 
 // ========================================
 // 8. Keep file operations disabled

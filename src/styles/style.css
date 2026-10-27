@@ -1263,3 +1263,72 @@ button:disabled {
     transform: translateY(0);
 }
 
+.selected-folders-panel {
+    margin-top: 24px;
+    padding: 22px;
+    border: 1px solid #2b3432;
+    border-radius: 14px;
+    background: #151b1a;
+}
+
+.selected-folders-heading h2 {
+    margin: 0 0 6px;
+    color: #e7eee9;
+    font-size: 18px;
+}
+
+.selected-folders-heading p {
+    margin: 0;
+    color: #929f99;
+    font-size: 13px;
+}
+
+.selected-folders-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.selected-folder-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px;
+    border: 1px solid #303a36;
+    border-radius: 10px;
+    background: #1b2320;
+}
+
+.selected-folder-details {
+    min-width: 0;
+}
+
+.selected-folder-details strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #d9f7e5;
+}
+
+.selected-folder-details p {
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: #a0aaa4;
+    font-size: 12px;
+}
+
+.remove-folder-button {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border: 1px solid #47524c;
+    border-radius: 8px;
+    background: transparent;
+    color: #e2e8e4;
+    cursor: pointer;
+}
+
+.remove-folder-button:hover {
+    border-color: #e07878;
+    color: #ffaaaa;
+}
+
