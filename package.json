@@ -1,16 +1,55 @@
+
 {
   "name": "the-sanctum-keeper",
   "version": "1.0.0",
-  "description": "",
+  "description": "A rule-based desktop file organizer",
   "main": "main.js",
   "scripts": {
-  "start": "electron ."
-},
+    "start": "electron .",
+    "build:backend": "mvn -f backend/pom.xml clean package",
+    "dist": "npm run build:backend && electron-builder --win nsis"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "electron": "^44.9.0"
+    "electron": "^44.9.0",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "com.sanctumkeeper.app",
+    "productName": "The Sanctum Keeper",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "javaBridge.js",
+      "index.html",
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "backend/target/sanctum-keeper-engine-1.0.0.jar",
+        "to": "backend/sanctum-keeper-engine-1.0.0.jar"
+      },
+      {
+        "from": "runtime",
+        "to": "runtime"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "The-Sanctum-Keeper-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }

@@ -1,13 +1,420 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="The Sanctum Keeper — organize your files with your own rules.">
+
     <title>The Sanctum Keeper</title>
+
+    <link rel="stylesheet" href="src/styles/style.css">
+    <script src="src/scripts/renderer.js" defer></script>
 </head>
+
 <body>
-    <h1>The Sanctum Keeper</h1>
-    <p>Your files. Your rules. Your sanctuary.</p>
+    <div class="app-shell">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a class="brand" href="#" aria-label="The Sanctum Keeper home">
+                <div class="brand-icon">S</div>
+                <div class="brand-text">
+                    <span>THE</span>
+                    <strong>SANCTUM<br>KEEPER</strong>
+                </div>
+            </a>
+
+            <div class="sidebar-section">
+                <p class="section-label">WORKSPACE</p>
+
+                <nav class="navigation" aria-label="Main navigation">
+                    <a href="#dashboard" class="nav-link active">
+                        <span class="nav-icon">⌂</span>
+                        Dashboard
+                    </a>
+
+                    <a href="#folders" class="nav-link">
+                        <span class="nav-icon">▱</span>
+                        Folders
+                    </a>
+
+                    <a href="#rules" class="nav-link">
+                        <span class="nav-icon">☷</span>
+                        Rules
+                    </a>
+
+                    <a href="#activity" class="nav-link">
+                        <span class="nav-icon">◷</span>
+                        Activity
+                    </a>
+
+                    <a href="#settings" class="nav-link">
+                        <span class="nav-icon">⚙</span>
+                        Settings
+                    </a>
+                </nav>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="protection-icon">✓</div>
+
+                <div>
+                    <strong>Confirmation required</strong>
+                    <p>Files move only after approval</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main application content -->
+        <main class="main-content" id="dashboard">
+
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">YOUR PERSONAL FILE WORKSPACE</p>
+                    <p class="workspace-name">Local workspace</p>
+                </div>
+
+                <div class="topbar-actions">
+                    <span class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span id="engine-status-text">Connecting to Java engine...</span>
+                    </span>
+
+                    <button class="button button-primary" id="preview-button">
+                        <span>▷</span> Preview organization
+                    </button>
+                </div>
+            </header>
+
+            <section class="welcome">
+                <div>
+                    <h1>Your files, in order.</h1>
+                    <p>A quiet, predictable home for every file.</p>
+                </div>
+
+                <span class="date-label">SANCTUM / OVERVIEW</span>
+            </section>
+
+            <!-- Overview statistics -->
+            <section class="stats-grid" aria-label="Workspace overview">
+
+                <article class="stat-card stat-green">
+                    <div class="stat-icon">▱</div>
+                    <div>
+                        <p>Selected folder</p>
+                        <h2 id="stat-selected-folders">00</h2>
+                        <span>Selected for this session</span>
+                    </div>
+                </article>
+
+                <article class="stat-card stat-purple">
+                    <div class="stat-icon">☷</div>
+                    <div>
+                        <p>Saved rules</p>
+                        <h2 id="stat-active-rules">00</h2>
+                        <span>Loaded from Java</span>
+                    </div>
+                </article>
+
+                <article class="stat-card stat-blue">
+                    <div class="stat-icon">▤</div>
+                    <div>
+                        <p>Files scanned</p>
+                        <h2 id="stat-files-previewed">00</h2>
+                        <span>Latest preview</span>
+                    </div>
+                </article>
+
+                <article class="stat-card stat-amber">
+                    <div class="stat-icon">△</div>
+                    <div>
+                        <p>Unmatched files</p>
+                        <h2 id="stat-unmatched-files">00</h2>
+                        <span>Latest preview</span>
+                    </div>
+                </article>
+
+            </section>
+
+            <!-- Main dashboard columns -->
+            <div class="dashboard-grid">
+
+                <div class="primary-column">
+
+                    <!-- Organization preview -->
+                    <section class="panel preview-panel" id="folders">
+                        <div class="panel-heading">
+                            <div>
+                                <p class="eyebrow">SAFE FILE OPERATIONS</p>
+                                <h2>Organization preview</h2>
+                                <p>See what will happen before anything moves.</p>
+                            </div>
+
+                            <span class="mode-badge">◉ DRY RUN</span>
+                        </div>
+
+                        <div class="source-folder">
+                            <div class="folder-symbol">▰</div>
+
+                            <div class="source-details">
+                                <span>Source folder</span>
+                                <strong id="source-folder-name">No folder selected</strong>
+                                <p id="source-folder-path">Choose a folder to preview files.</p>
+                            </div>
+
+                            <button class="button button-secondary" id="change-folder-button">
+                                Change
+                            </button>
+                        </div>
+
+                        <div class="table-heading">
+                            <h3>Planned file changes</h3>
+                            <span class="sample-badge" id="preview-data-badge">
+                            NO PREVIEW YET
+                            </span>
+                        </div>
+
+                        <div class="file-table-wrapper">
+                            <table class="file-table">
+                                <thead>
+                                    <tr>
+                                        <th>File name</th>
+                                        <th>Status</th>
+                                        <th>Rule</th>
+                                        <th>Destination</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="preview-table-body">
+                                    <!-- <tr>
+                                        <td>
+                                            <span class="file-name">
+                                                <span class="file-type pdf">PDF</span>
+                                                invoice_march.pdf
+                                            </span>
+                                        </td>
+                                        <td>PDF</td>
+                                        <td>342 KB</td>
+                                        <td><span class="destination">Documents / Invoices</span></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            <span class="file-name">
+                                                <span class="file-type image">IMG</span>
+                                                wallpaper.png
+                                            </span>
+                                        </td>
+                                        <td>PNG</td>
+                                        <td>2.4 MB</td>
+                                        <td><span class="destination">Images / Wallpapers</span></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            <span class="file-name">
+                                                <span class="file-type text-file">TXT</span>
+                                                project-notes.md
+                                            </span>
+                                        </td>
+                                        <td>MD</td>
+                                        <td>12 KB</td>
+                                        <td><span class="destination">Documents / Notes</span></td>
+                                    </tr> -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="preview-notice">
+                            <span class="notice-icon">✓</span>
+                            <div>
+                                <strong id="preview-summary">3 files would be organized</strong>
+                                <p id="preview-notice-message">
+                                Preview only. No files have been changed.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="panel-actions">
+                            <button class="button button-secondary" id="review-button">
+                                Review changes
+                            </button>
+
+                            <button class="button button-primary" id="organize-button" disabled>
+                                Organize files
+                            </button>
+                        </div>
+
+                        <p class="safety-note">
+                           Preview is non-destructive. File moves require your confirmation.
+                        </p>
+                    </section>
+
+                    <!-- Quick actions -->
+                    <section class="panel quick-panel">
+                        <div class="panel-heading compact-heading">
+                            <div>
+                                <h2>Quick actions</h2>
+                                <p>Shortcuts for your workspace.</p>
+                            </div>
+                        </div>
+
+                        <div class="quick-actions">
+                            <button class="quick-action" id="add-folder-button">
+                                <span class="quick-icon">＋</span>
+                                <span>Select source folder</span>
+                                <span class="action-arrow">›</span>
+                            </button>
+
+                            <button class="quick-action" id="create-rule-button">
+                                <span class="quick-icon">☷</span>
+                                <span>Create new rule</span>
+                                <span class="action-arrow">›</span>
+                            </button>
+
+                            <button class="quick-action" id="run-preview-button">
+                                <span class="quick-icon">◎</span>
+                                <span>Run preview</span>
+                                <span class="action-arrow">›</span>
+                            </button>
+
+                            <button class="quick-action" id="open-folder-button">
+                                <span class="quick-icon">▱</span>
+                                <span>Open folder</span>
+                                <span class="action-arrow">›</span>
+                            </button>
+                        </div>
+                    </section>
+
+                </div>
+
+                <!-- Right dashboard column -->
+                <div class="secondary-column">
+
+                    <!-- Rules summary -->
+                    <section class="panel rules-panel" id="rules">
+                        <div class="panel-heading">
+                            <div>
+                                <p class="eyebrow">DETERMINISTIC ORGANIZATION</p>
+                                <h2>Rules at a glance</h2>
+                                <p>Every file has a predictable destination.</p>
+                            </div>
+
+                            <button class="button button-secondary" id="manage-rules-button">
+                                Manage
+                            </button>
+                        </div>
+
+                        <div class="rule-list" id="dashboard-rule-list">
+                            <p class="rule-empty-message">Loading saved rules...</p>
+                        </div>
+
+                        <p class="sample-footnote" id="dashboard-rules-footnote">
+                            Loading rules from Java...
+                        </p>                    
+                    </section>
+
+                    <!-- Activity timeline -->
+                    <section class="panel activity-panel" id="activity">
+                        <div class="panel-heading">
+                            <div>
+                                <p class="eyebrow">WORKSPACE HISTORY</p>
+                                <h2>Activity timeline</h2>
+                                <p>Recent organization activity.</p>
+                            </div>
+
+
+                            <button
+                            class="button button-secondary"
+                            id="undo-button"
+                            disabled>
+                                Undo last move
+                            </button>
+
+                            <button class="button button-secondary" id="view-activity-button">
+                                View all
+                            </button>
+                        </div>
+
+                        <!--
+                        <div class="activity-list" id="activity-list">
+
+                            <article class="activity-item">
+                                <span class="activity-dot"></span>
+                                <span class="activity-file pdf">PDF</span>
+                                <div class="activity-details">
+                                    <strong>report.pdf</strong>
+                                    <p>Sample · Documents / Reports</p>
+                                </div>
+                                <time>10:24</time>
+                            </article>
+
+                            <article class="activity-item">
+                                <span class="activity-dot"></span>
+                                <span class="activity-file image">IMG</span>
+                                <div class="activity-details">
+                                    <strong>wallpaper.png</strong>
+                                    <p>Sample · Images / Wallpapers</p>
+                                </div>
+                                <time>10:22</time>
+                            </article>
+
+                            <article class="activity-item">
+                                <span class="activity-dot"></span>
+                                <span class="activity-file text-file">MD</span>
+                                <div class="activity-details">
+                                    <strong>project-notes.md</strong>
+                                    <p>Sample · Documents / Notes</p>
+                                </div>
+                                <time>10:20</time>
+                            </article>
+
+                            <article class="activity-item">
+                                <span class="activity-dot"></span>
+                                <span class="activity-file archive">ZIP</span>
+                                <div class="activity-details">
+                                    <strong>data_backup.zip</strong>
+                                    <p>Sample · Archives / Backups</p>
+                                </div>
+                                <time>09:41</time>
+                            </article>
+
+                        </div>
+                    </section>
+                    -->
+
+                        <div class="activity-list" id="activity-list">
+                        <p class="activity-empty-message">
+                        No organization activity yet.
+                        Your actual file operations will appear here.
+                        </p>
+                        </div>
+                    </section>
+
+                    <!-- Settings placeholder -->
+                    <section class="panel settings-strip" id="settings">
+                        <span class="settings-symbol">⚙</span>
+                        <div>
+                            <strong>Workspace settings</strong>
+                            <p>Preferences and organization safeguards.</p>
+                        </div>
+                        <button class="button button-secondary" id="settings-button">
+                            Open
+                        </button>
+                    </section>
+
+                </div>
+            </div>
+
+            <footer class="app-footer">
+                <span>THE SANCTUM KEEPER</span>
+                <span>LOCAL WORKSPACE · RULE-BASED ORGANIZATION</span>
+            </footer>
+
+        </main>
+    </div>
 </body>
+
 </html>

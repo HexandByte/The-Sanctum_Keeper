@@ -4,3 +4,9 @@ out/
 .DS_Store
 Thumbs.db
 npm-debug.log*
+runtime/
+backend/target/
+
+# Java/Maven build output
+target/
+backend/dependency-reduced-pom.xml
