@@ -19,32 +19,32 @@ const navLinks = document.querySelectorAll(".nav-link");
 // 2. Sample data for our dry-run preview //
 // ======================================== //
 
-const sampleFiles = [
-    {
-        name: "invoice_march.pdf",
-        type: "PDF",
-        size: "342 KB",
-        destination: "Documents / Invoices",
-        icon: "PDF",
-        category: "pdf"
-    },
-    {
-        name: "wallpaper.png",
-        type: "PNG",
-        size: "2.4 MB",
-        destination: "Images / Wallpapers",
-        icon: "IMG",
-        category: "image"
-    },
-    {
-        name: "project-notes.md",
-        type: "MD",
-        size: "12 KB",
-        destination: "Documents / Notes",
-        icon: "TXT",
-        category: "text-file"
-    }
-];
+// const sampleFiles = [
+//     {
+//         name: "invoice_march.pdf",
+//         type: "PDF",
+//         size: "342 KB",
+//         destination: "Documents / Invoices",
+//         icon: "PDF",
+//         category: "pdf"
+//     },
+//     {
+//         name: "wallpaper.png",
+//         type: "PNG",
+//         size: "2.4 MB",
+//         destination: "Images / Wallpapers",
+//         icon: "IMG",
+//         category: "image"
+//     },
+//     {
+//         name: "project-notes.md",
+//         type: "MD",
+//         size: "12 KB",
+//         destination: "Documents / Notes",
+//         icon: "TXT",
+//         category: "text-file"
+//     }
+// ];
 
 // ======================================== //
 // 3. Show a notification //
@@ -71,55 +71,134 @@ function showNotification(message) {
 // 4. Simulate an organization preview //
 // ======================================== //
 
-function runPreview() {
-    previewTableBody.replaceChildren();
 
-    sampleFiles.forEach(function (file) {
-        const row = document.createElement("tr");
+function getDestinationFilePath(destinationFolder, fileName) {
+    // Java returns the destination folder, so append the filename.
+    const separator = destinationFolder.includes("\\") ? "\\" : "/";
+    const needsSeparator = !/[\\/]$/.test(destinationFolder);
 
-        const nameCell = document.createElement("td");
-        const nameWrapper = document.createElement("span");
-        const fileIcon = document.createElement("span");
+    return destinationFolder +
+        (needsSeparator ? separator : "") +
+        fileName;
+}
 
-        nameWrapper.className = "file-name";
-        fileIcon.className = "file-type " + file.category;
-        fileIcon.textContent = file.icon;
+async function runPreview() {
+    // The current Java backend previews one folder per request.
+    if (selectedFolderPaths.size === 0) {
+        showNotification("Please select a folder first.");
+        return;
+    }
 
-        nameWrapper.append(fileIcon, document.createTextNode(file.name));
-        nameCell.appendChild(nameWrapper);
-
-        const typeCell = document.createElement("td");
-        typeCell.textContent = file.type;
-
-        const sizeCell = document.createElement("td");
-        sizeCell.textContent = file.size;
-
-        const destinationCell = document.createElement("td");
-        const destination = document.createElement("span");
-
-        destination.className = "destination";
-        destination.textContent = file.destination;
-        destinationCell.appendChild(destination);
-
-        row.append(
-            nameCell,
-            typeCell,
-            sizeCell,
-            destinationCell
+    if (selectedFolderPaths.size > 1) {
+        showNotification(
+            "Please keep only one folder selected for this preview."
         );
+        return;
+    }
 
-        previewTableBody.appendChild(row);
-    });
+    const sourceFolder = selectedFolderPaths.values().next().value;
 
-    previewSummary.textContent =
-        sampleFiles.length + " sample files would be organized";
-
+    // Show loading feedback and prevent execution during preview.
+    previewButton.disabled = true;
+    runPreviewButton.disabled = true;
     organizeButton.disabled = true;
 
-    showNotification(
-        "Preview complete. Sample data only — no files were changed."
-    );
+    previewTableBody.replaceChildren();
+    previewSummary.textContent = "Scanning selected folder...";
+
+    try {
+        // Ask Java to scan the folder and evaluate its saved rules.
+        const data = await window.sanctum.preview(sourceFolder);
+        const results = Array.isArray(data.results) ? data.results : [];
+
+        results.forEach(function (file) {
+            const row = document.createElement("tr");
+
+            // File name and its small extension label.
+            const nameCell = document.createElement("td");
+            const nameWrapper = document.createElement("span");
+            const fileIcon = document.createElement("span");
+
+            nameWrapper.className = "file-name";
+            fileIcon.className = "file-type";
+
+            const extension = file.fileName.includes(".")
+                ? file.fileName.split(".").pop()
+                : "FILE";
+
+            fileIcon.textContent = extension.toUpperCase().slice(0, 3);
+
+            nameWrapper.append(
+                fileIcon,
+                document.createTextNode(file.fileName)
+            );
+
+            nameCell.appendChild(nameWrapper);
+
+            // Show the status returned by Java.
+            const statusCell = document.createElement("td");
+            statusCell.textContent = file.status || "UNKNOWN";
+
+            // Show the matched rule ID, if there is one.
+            const ruleCell = document.createElement("td");
+            ruleCell.textContent = file.ruleId || "—";
+
+            // Java currently returns a destination folder, not a full file path.
+            const destinationCell = document.createElement("td");
+            const destination = document.createElement("span");
+
+            destination.className = "destination";
+
+            if (file.status === "MATCHED" && file.destination) {
+                destination.textContent = getDestinationFilePath(
+                    file.destination,
+                    file.fileName
+                );
+            } else {
+                destination.textContent = "No matching rule";
+            }
+
+            destinationCell.appendChild(destination);
+
+            row.append(
+                nameCell,
+                statusCell,
+                ruleCell,
+                destinationCell
+            );
+
+            previewTableBody.appendChild(row);
+        });
+
+        // Use the actual summary returned by the Java backend.
+        const summary = data.summary || {};
+        const total = summary.totalFiles ?? results.length;
+        const matched = summary.matchedFiles ?? 0;
+        const unmatched = summary.unmatchedFiles ?? 0;
+
+        previewSummary.textContent =
+            `${total} files scanned · ${matched} matched · ` +
+            `${unmatched} without a matching rule`;
+
+        showNotification("Preview complete. No files were changed.");
+
+    } catch (error) {
+        console.error("Preview failed:", error);
+
+        previewSummary.textContent = "Preview failed.";
+
+        showNotification(
+            error.message || "Could not preview the selected folder."
+        );
+
+    } finally {
+        // Restore the preview buttons; real organization stays disabled.
+        previewButton.disabled = false;
+        runPreviewButton.disabled = false;
+        organizeButton.disabled = true;
+    }
 }
+
 
 // ======================================== //
 // 5. Connect buttons to their actions //

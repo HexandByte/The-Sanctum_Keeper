@@ -30,8 +30,8 @@ public class RuleValidator{
         if(type.equals("filename")){
             String matchMode=condition.getMatchMode();
             if(matchMode==null || (!matchMode.equals("startsWith")
-            && matchMode.equals("contains")
-            && matchMode.equals("equals")))
+            && !matchMode.equals("contains")
+            && !matchMode.equals("equals")))
                 return "Invalid filename match mode.";
         }
 
