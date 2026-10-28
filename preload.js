@@ -8,6 +8,10 @@ contextBridge.exposeInMainWorld("sanctum", {
     // Open the native folder picker.
     selectFolder: () => ipcRenderer.invoke("dialog:select-folder"),
 
+    // Open a folder in Windows File Explorer.
+    openFolder: (folderPath) =>
+    ipcRenderer.invoke("folder:open", folderPath),
+
     // Load and save rules through Java.
     getRules: () => ipcRenderer.invoke("engine:get-rules"),
     saveRules: (rules) => ipcRenderer.invoke("engine:save-rules", rules),

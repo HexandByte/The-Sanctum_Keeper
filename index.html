@@ -61,8 +61,8 @@
                 <div class="protection-icon">✓</div>
 
                 <div>
-                    <strong>Protection active</strong>
-                    <p>Preview mode · No files moved</p>
+                    <strong>Confirmation required</strong>
+                    <p>Files move only after approval</p>
                 </div>
             </div>
         </aside>
@@ -78,8 +78,8 @@
 
                 <div class="topbar-actions">
                     <span class="status-indicator">
-                        <span class="status-dot"></span>
-                        All systems ready
+                    <span class="status-dot"></span>
+                    <span id="engine-status-text">Connecting to Java engine...</span>
                     </span>
 
                     <button class="button button-primary" id="preview-button">
@@ -105,7 +105,7 @@
                     <div>
                         <p>Selected folder</p>
                         <h2 id="stat-selected-folders">00</h2>
-                        <span>Current session only</span>
+                        <span>Selected for this session</span>
                     </div>
                 </article>
 
@@ -171,7 +171,9 @@
 
                         <div class="table-heading">
                             <h3>Planned file changes</h3>
-                            <span class="sample-badge">SAMPLE DATA</span>
+                            <span class="sample-badge" id="preview-data-badge">
+                            NO PREVIEW YET
+                            </span>
                         </div>
 
                         <div class="file-table-wrapper">
@@ -229,7 +231,9 @@
                             <span class="notice-icon">✓</span>
                             <div>
                                 <strong id="preview-summary">3 files would be organized</strong>
-                                <p>Nothing has changed on your computer.</p>
+                                <p id="preview-notice-message">
+                                Preview only. No files have been changed.
+                                </p>
                             </div>
                         </div>
 
@@ -244,7 +248,7 @@
                         </div>
 
                         <p class="safety-note">
-                            File operations will remain disabled until the safe backend workflow is implemented.
+                           Preview is non-destructive. File moves require your confirmation.
                         </p>
                     </section>
 
@@ -260,7 +264,7 @@
                         <div class="quick-actions">
                             <button class="quick-action" id="add-folder-button">
                                 <span class="quick-icon">＋</span>
-                                <span>Add watched folder</span>
+                                <span>Select source folder</span>
                                 <span class="action-arrow">›</span>
                             </button>
 
@@ -321,11 +325,20 @@
                                 <p>Recent organization activity.</p>
                             </div>
 
+
+                            <button
+                            class="button button-secondary"
+                            id="undo-button"
+                            disabled>
+                                Undo last move
+                            </button>
+
                             <button class="button button-secondary" id="view-activity-button">
                                 View all
                             </button>
                         </div>
 
+                        <!--
                         <div class="activity-list" id="activity-list">
 
                             <article class="activity-item">
@@ -370,6 +383,15 @@
 
                         </div>
                     </section>
+                    -->
+
+                        <div class="activity-list" id="activity-list">
+                        <p class="activity-empty-message">
+                        No organization activity yet.
+                        Your actual file operations will appear here.
+                        </p>
+                        </div>
+                    </section>
 
                     <!-- Settings placeholder -->
                     <section class="panel settings-strip" id="settings">
@@ -388,7 +410,7 @@
 
             <footer class="app-footer">
                 <span>THE SANCTUM KEEPER</span>
-                <span>LOCAL WORKSPACE · PREVIEW ONLY</span>
+                <span>LOCAL WORKSPACE · RULE-BASED ORGANIZATION</span>
             </footer>
 
         </main>

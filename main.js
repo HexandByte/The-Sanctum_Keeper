@@ -1,8 +1,9 @@
 
 "use strict";
 
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron");
 const path = require("node:path");
+const fs = require("node:fs/promises");
 const JavaBridge = require("./javaBridge");
 
 let javaBridge = null;
@@ -35,6 +36,30 @@ ipcMain.handle("dialog:select-folder", async () => {
     }
 
     return result.filePaths[0];
+});
+
+// Open a selected directory in the system file manager.
+ipcMain.handle("folder:open", async (_event, folderPath) => {
+    if (typeof folderPath !== "string" || !folderPath.trim()) {
+        throw new Error("A valid folder path is required.");
+    }
+
+    const resolvedPath = path.resolve(folderPath);
+
+    const fs = require("node:fs/promises");
+    const stats = await fs.stat(resolvedPath);
+
+    if (!stats.isDirectory()) {
+        throw new Error("The selected path is not a folder.");
+    }
+
+    const errorMessage = await shell.openPath(resolvedPath);
+
+    if (errorMessage) {
+        throw new Error(errorMessage);
+    }
+
+    return { opened: true };
 });
 
 // Load the saved rules from Java.
