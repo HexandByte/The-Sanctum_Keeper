@@ -103,36 +103,36 @@
                 <article class="stat-card stat-green">
                     <div class="stat-icon">▱</div>
                     <div>
-                        <p>Watched folders</p>
-                        <h2>04</h2>
-                        <span>Folders configured</span>
+                        <p>Selected folder</p>
+                        <h2 id="stat-selected-folders">00</h2>
+                        <span>Current session only</span>
                     </div>
                 </article>
 
                 <article class="stat-card stat-purple">
                     <div class="stat-icon">☷</div>
                     <div>
-                        <p>Active rules</p>
-                        <h2>12</h2>
-                        <span>Rules enabled</span>
+                        <p>Saved rules</p>
+                        <h2 id="stat-active-rules">00</h2>
+                        <span>Loaded from Java</span>
                     </div>
                 </article>
 
                 <article class="stat-card stat-blue">
                     <div class="stat-icon">▤</div>
                     <div>
-                        <p>Files organized</p>
-                        <h2>1,284</h2>
-                        <span>Lifetime total</span>
+                        <p>Files scanned</p>
+                        <h2 id="stat-files-previewed">00</h2>
+                        <span>Latest preview</span>
                     </div>
                 </article>
 
                 <article class="stat-card stat-amber">
                     <div class="stat-icon">△</div>
                     <div>
-                        <p>Pending review</p>
-                        <h2>06</h2>
-                        <span>Awaiting your decision</span>
+                        <p>Unmatched files</p>
+                        <h2 id="stat-unmatched-files">00</h2>
+                        <span>Latest preview</span>
                     </div>
                 </article>
 
@@ -160,8 +160,8 @@
 
                             <div class="source-details">
                                 <span>Source folder</span>
-                                <strong>Downloads</strong>
-                                <p>Sample workspace · No real folder selected</p>
+                                <strong id="source-folder-name">No folder selected</strong>
+                                <p id="source-folder-path">Choose a folder to preview files.</p>
                             </div>
 
                             <button class="button button-secondary" id="change-folder-button">
@@ -303,51 +303,13 @@
                             </button>
                         </div>
 
-                        <div class="rule-list">
-
-                            <article class="rule-item">
-                                <div class="rule-icon rule-green">▧</div>
-                                <div class="rule-details">
-                                    <strong>Images</strong>
-                                    <span>jpg, png, jpeg, svg</span>
-                                </div>
-                                <span class="rule-arrow">→</span>
-                                <span class="rule-destination">Images/</span>
-                            </article>
-
-                            <article class="rule-item">
-                                <div class="rule-icon rule-red">PDF</div>
-                                <div class="rule-details">
-                                    <strong>PDF documents</strong>
-                                    <span>.pdf</span>
-                                </div>
-                                <span class="rule-arrow">→</span>
-                                <span class="rule-destination">Documents/</span>
-                            </article>
-
-                            <article class="rule-item">
-                                <div class="rule-icon rule-blue">TXT</div>
-                                <div class="rule-details">
-                                    <strong>Text &amp; Markdown</strong>
-                                    <span>txt, md, rtf</span>
-                                </div>
-                                <span class="rule-arrow">→</span>
-                                <span class="rule-destination">Notes/</span>
-                            </article>
-
-                            <article class="rule-item">
-                                <div class="rule-icon rule-amber">!</div>
-                                <div class="rule-details">
-                                    <strong>Large files</strong>
-                                    <span>Over 1 GB</span>
-                                </div>
-                                <span class="rule-arrow">→</span>
-                                <span class="rule-destination review-destination">Review first</span>
-                            </article>
-
+                        <div class="rule-list" id="dashboard-rule-list">
+                            <p class="rule-empty-message">Loading saved rules...</p>
                         </div>
 
-                        <p class="sample-footnote">Illustrative rules · Not connected to the backend</p>
+                        <p class="sample-footnote" id="dashboard-rules-footnote">
+                            Loading rules from Java...
+                        </p>                    
                     </section>
 
                     <!-- Activity timeline -->

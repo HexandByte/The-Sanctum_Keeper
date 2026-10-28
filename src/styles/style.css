@@ -1332,3 +1332,235 @@ button:disabled {
     color: #ffaaaa;
 }
 
+
+/* Rule manager modal */
+.rule-editor-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.76);
+}
+
+.rule-editor-modal[hidden] {
+    display: none !important;
+}
+
+.rule-editor-dialog {
+    width: min(680px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 26px;
+    border: 1px solid #303b36;
+    border-radius: 16px;
+    background: #141a18;
+    color: #e8efe9;
+    box-shadow: 0 24px 80px #00000070;
+}
+
+.rule-editor-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.rule-editor-eyebrow {
+    margin: 0 0 8px;
+    color: #70d9ad;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+}
+
+.rule-editor-header h2 {
+    margin: 0;
+    font-size: 26px;
+}
+
+.rule-modal-close {
+    width: 36px;
+    height: 36px;
+    border: 1px solid #37443d;
+    border-radius: 8px;
+    background: transparent;
+    color: #e8efe9;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.rule-editor-description {
+    margin: 12px 0 20px;
+    color: #9ba9a1;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.rule-editor-message {
+    min-height: 20px;
+    margin: 12px 0;
+    color: #80dfb5;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.saved-rules-section {
+    margin-bottom: 26px;
+}
+
+.saved-rules-section h3,
+.rule-editor-form h3 {
+    margin: 0 0 14px;
+    font-size: 16px;
+}
+
+.saved-rules-list {
+    display: grid;
+    gap: 10px;
+}
+
+.saved-rule-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px;
+    border: 1px solid #303b36;
+    border-radius: 10px;
+    background: #1a211e;
+}
+
+.saved-rule-details {
+    min-width: 0;
+}
+
+.saved-rule-details strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.saved-rule-details p {
+    margin: 0;
+    color: #a7b4ac;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.saved-rule-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 8px;
+}
+
+.rule-empty-message {
+    margin: 0;
+    padding: 16px;
+    border: 1px dashed #3a4840;
+    border-radius: 10px;
+    color: #9ba9a1;
+    font-size: 13px;
+}
+
+.rule-editor-form {
+    display: grid;
+    gap: 16px;
+    padding-top: 22px;
+    border-top: 1px solid #303b36;
+}
+
+.rule-form-field {
+    display: grid;
+    gap: 8px;
+    color: #d9e3dc;
+    font-size: 13px;
+}
+
+.rule-form-field[hidden] {
+    display: none !important;
+}
+
+.rule-form-field input,
+.rule-form-field select {
+    width: 100%;
+    min-width: 0;
+    padding: 11px 12px;
+    border: 1px solid #37443d;
+    border-radius: 8px;
+    outline: none;
+    background: #0f1412;
+    color: #e8efe9;
+    font: inherit;
+}
+
+.rule-form-field input:focus,
+.rule-form-field select:focus {
+    border-color: #64d6a5;
+    box-shadow: 0 0 0 2px #64d6a51c;
+}
+
+.rule-field-help {
+    color: #8e9b93;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.rule-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.rule-primary-button,
+.rule-secondary-button,
+.rule-remove-button {
+    padding: 9px 13px;
+    border: 1px solid #37443d;
+    border-radius: 8px;
+    background: #202923;
+    color: #e8efe9;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.rule-primary-button {
+    border-color: #2e6d50;
+    background: #173c2b;
+    color: #92f0c2;
+}
+
+.rule-remove-button {
+    border-color: #663d3d;
+    background: #352020;
+    color: #ffb0b0;
+}
+
+.rule-primary-button:hover,
+.rule-secondary-button:hover,
+.rule-remove-button:hover,
+.rule-modal-close:hover {
+    filter: brightness(1.2);
+}
+
+@media (max-width: 560px) {
+    .rule-editor-modal {
+        padding: 10px;
+    }
+
+    .rule-editor-dialog {
+        max-height: 94vh;
+        padding: 18px;
+    }
+
+    .saved-rule-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
