@@ -89,13 +89,31 @@ ipcMain.handle("engine:undo", () => {
 
 // Initialize the Java bridge and open the application.
 app.whenReady().then(() => {
+    const resourceRoot = app.isPackaged
+        ? process.resourcesPath
+        : __dirname;
+
     javaBridge = new JavaBridge({
-        jarPath: path.join(
-            __dirname,
-            "backend",
-            "target",
-            "sanctum-keeper-engine-1.0.0.jar"
+        jarPath: app.isPackaged
+            ? path.join(
+                resourceRoot,
+                "backend",
+                "sanctum-keeper-engine-1.0.0.jar"
+            )
+            : path.join(
+                __dirname,
+                "backend",
+                "target",
+                "sanctum-keeper-engine-1.0.0.jar"
+            ),
+
+        javaExecutable: path.join(
+            resourceRoot,
+            "runtime",
+            "bin",
+            "java.exe"
         ),
+
         configDirectory: path.join(
             app.getPath("userData"),
             "config"

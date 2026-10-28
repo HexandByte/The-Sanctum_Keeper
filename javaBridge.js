@@ -6,9 +6,10 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 class JavaBridge {
-    constructor({ jarPath, configDirectory }) {
+    constructor({ jarPath, configDirectory, javaExecutable }) {
         this.jarPath = jarPath;
         this.configDirectory = configDirectory;
+        this.javaExecutable = javaExecutable;
 
         this.child = null;
         this.ready = false;
@@ -78,15 +79,16 @@ class JavaBridge {
                 return;
             }
 
-            // Prefer the Java installation specified by JAVA_HOME.
-            const javaExecutable = process.env.JAVA_HOME
-                ? path.join(
-                    process.env.JAVA_HOME,
-                    "bin",
-                    process.platform === "win32" ? "java.exe" : "java"
-                )
-                : "java";
-
+            // Prefer the bundled Java runtime when one is provided.
+            const javaExecutable = this.javaExecutable || (
+                process.env.JAVA_HOME
+                    ? path.join(
+                        process.env.JAVA_HOME,
+                        "bin",
+                        process.platform === "win32" ? "java.exe" : "java"
+                    )
+                    : "java"
+            );
             const child = spawn(
                 javaExecutable,
                 [
